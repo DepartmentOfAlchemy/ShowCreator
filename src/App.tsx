@@ -1,51 +1,65 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import { invoke } from "@tauri-apps/api/core";
-import "./App.css";
+import CssBaseline from '@mui/material/CssBaseline';
+import { createHashRouter, RouterProvider } from 'react-router';
+import DashboardLayout from './components/DashboardLayout';
+import EmployeeList from './components/EmployeeList';
+import EmployeeShow from './components/EmployeeShow';
+import EmployeeCreate from './components/EmployeeCreate';
+import EmployeeEdit from './components/EmployeeEdit';
+import NotificationsProvider from './hooks/useNotifications/NotificationsProvider';
+import DialogsProvider from './hooks/useDialogs/DialogsProvider';
+import AppTheme from './shared-theme/AppTheme';
+import {
+  dataGridCustomizations,
+  datePickersCustomizations,
+  sidebarCustomizations,
+  formInputCustomizations,
+} from './theme/customizations';
 
-function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+const router = createHashRouter([
+  {
+    Component: DashboardLayout,
+    children: [
+      {
+        path: '/employees',
+        Component: EmployeeList,
+      },
+      {
+        path: '/employees/:employeeId',
+        Component: EmployeeShow,
+      },
+      {
+        path: '/employees/new',
+        Component: EmployeeCreate,
+      },
+      {
+        path: '/employees/:employeeId/edit',
+        Component: EmployeeEdit,
+      },
+      // Fallback route for the example routes in dashboard sidebar items
+      {
+        path: '*',
+        Component: EmployeeList,
+      },
+    ],
+  },
+]);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-    setGreetMsg(await invoke("greet", { name }));
-  }
+const themeComponents = {
+  ...dataGridCustomizations,
+  ...datePickersCustomizations,
+  ...sidebarCustomizations,
+  ...formInputCustomizations,
+};
 
+export default function App(props: { disableCustomTheme?: boolean }) {
   return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-
-      <div className="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/vite.svg" className="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img src="/tauri.svg" className="logo tauri" alt="Tauri logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <p>Click on the Tauri, Vite, and React logos to learn more.</p>
-
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
+    <AppTheme {...props} themeComponents={themeComponents}>
+      <CssBaseline enableColorScheme />
+      <NotificationsProvider>
+        <DialogsProvider>
+          <RouterProvider router={router} />
+        </DialogsProvider>
+      </NotificationsProvider>
+    </AppTheme>
   );
 }
-
-export default App;
