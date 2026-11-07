@@ -9,6 +9,7 @@ import type {} from '@mui/material/themeCssVarsAugmentation';
 import PersonIcon from '@mui/icons-material/Person';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import DescriptionIcon from '@mui/icons-material/Description';
+import TuneIcon from '@mui/icons-material/Tune';
 import LayersIcon from '@mui/icons-material/Layers';
 import { matchPath, useLocation } from 'react-router';
 import DashboardSidebarContext from '../context/DashboardSidebarContext';
@@ -160,6 +161,14 @@ export default function DashboardSidebar({
               selected={!!matchPath('/employees/*', pathname) || pathname === '/'}
             />
             <DashboardSidebarDividerItem />
+            <DashboardSidebarHeaderItem>Admin</DashboardSidebarHeaderItem>
+            <DashboardSidebarPageItem
+              id="controllers"
+              title="Controllers"
+              icon={<TuneIcon />}
+              href="/controllers"
+              selected={!!matchPath('/controllers', pathname)}
+            />
             <DashboardSidebarHeaderItem>Example items</DashboardSidebarHeaderItem>
             <DashboardSidebarPageItem
               id="reports"

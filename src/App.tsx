@@ -1,5 +1,9 @@
 import CssBaseline from '@mui/material/CssBaseline';
 import { createHashRouter, RouterProvider } from 'react-router';
+import ControllerList from './components/ControllerList';
+import ControllerCreate from './components/ControllerCreate';
+import ControllerEdit from './components/ControllerEdit';
+import ControllerShow from './components/ControllerShow';
 import DashboardLayout from './components/DashboardLayout';
 import EmployeeList from './components/EmployeeList';
 import EmployeeShow from './components/EmployeeShow';
@@ -19,6 +23,22 @@ const router = createHashRouter([
   {
     Component: DashboardLayout,
     children: [
+      {
+        path: '/controllers',
+        Component: ControllerList,
+      },
+      {
+        path: '/controllers/new',
+        Component: ControllerCreate,
+      },
+      {
+        path: '/controllers/:controllerId/edit',
+        Component: ControllerEdit,
+      },
+      {
+        path: '/controllers/:controllerId',
+        Component: ControllerShow,
+      },
       {
         path: '/employees',
         Component: EmployeeList,
