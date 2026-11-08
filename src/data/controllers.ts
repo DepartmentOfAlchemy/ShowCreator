@@ -1,3 +1,4 @@
+import { invoke } from '@tauri-apps/api/core';
 import type { GridFilterModel, GridPaginationModel, GridSortModel } from '@mui/x-data-grid';
 
 type OutputType = 'DMX' | 'MIDI' | 'Analog' | 'Digital';
@@ -14,26 +15,17 @@ export interface Controller {
     inputs: InputType[];
 }
 
-const INITIAL_CONTROLLERS_STORE: Controller[] = [
-    {
-        id: 1,
-        name: 'Codex 43',
-        description: 'Controller with 4 SSO outputs and 3 digitally isolated inputs',
-        manufacturer: 'Department of Alchemy',
-        model: 'Codex 43',
-        version: 'B',
-        outputs: ['Analog', 'Analog', 'Analog', 'Analog'],
-        inputs: ['Digital', 'Digital', 'Digital'],
-    }
-];
+async function getControllers(): Promise<Controller[]> {
+  const legacyControllersJson = localStorage.getItem('controllers-store');
+  const controllers = await invoke<Controller[]>('get_controllers', {
+    legacyControllersJson,
+  });
 
-export function getControllersStore(): Controller[] {
-  const stringifiedControllers = localStorage.getItem('controllers-store');
-  return stringifiedControllers ? JSON.parse(stringifiedControllers) : INITIAL_CONTROLLERS_STORE;
-}
+  if (legacyControllersJson !== null) {
+    localStorage.removeItem('controllers-store');
+  }
 
-export function setControllersStore(controllers: Controller[]) {
-  return localStorage.setItem('controllers-store', JSON.stringify(controllers));
+  return controllers;
 }
 
 export async function getMany({
@@ -45,7 +37,7 @@ export async function getMany({
   sortModel: GridSortModel;
   filterModel: GridFilterModel;
 }): Promise<{ items: Controller[]; itemCount: number }> {
-  const controllersStore = getControllersStore();
+  const controllersStore = await getControllers();
 
   let filteredControllers = [...controllersStore];
 
@@ -106,54 +98,23 @@ export async function getMany({
 }
 
 export async function getOne(controllerId: number) {
-  const controllersStore = getControllersStore();
-
-  const controllerToShow = controllersStore.find((controller) => controller.id === controllerId);
-
-  if (!controllerToShow) {
-    throw new Error('Controller not found');
-  }
-  return controllerToShow;
+  await getControllers();
+  return invoke<Controller>('get_controller', { controllerId });
 }
 
 export async function createOne(data: Omit<Controller, 'id'>) {
-  const controllersStore = getControllersStore();
-
-  const newController = {
-    id: controllersStore.reduce((max, controller) => Math.max(max, controller.id), 0) + 1,
-    ...data,
-  };
-
-  setControllersStore([...controllersStore, newController]);
-
-  return newController;
+  await getControllers();
+  return invoke<Controller>('create_controller', { data });
 }
 
 export async function updateOne(controllerId: number, data: Partial<Omit<Controller, 'id'>>) {
-  const controllersStore = getControllersStore();
-
-  let updatedController: Controller | null = null;
-
-  setControllersStore(
-    controllersStore.map((controller) => {
-      if (controller.id === controllerId) {
-        updatedController = { ...controller, ...data };
-        return updatedController;
-      }
-      return controller;
-    }),
-  );
-
-  if (!updatedController) {
-    throw new Error('Controller not found');
-  }
-  return updatedController;
+  await getControllers();
+  return invoke<Controller>('update_controller', { controllerId, data });
 }
 
 export async function deleteOne(controllerId: number) {
-  const controllersStore = getControllersStore();
-
-  setControllersStore(controllersStore.filter((controller) => controller.id !== controllerId));
+  await getControllers();
+  await invoke<void>('delete_controller', { controllerId });
 }
 
 // Validation follows the [Standard Schema](https://standardschema.dev/).

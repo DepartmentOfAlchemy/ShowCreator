@@ -13,3 +13,10 @@ This template should help get you started developing with Tauri, React and Types
 # Building
 
 `pnpm tauri build`
+
+# Controller data
+
+Controller records are stored in `controllers.json` in Tauri's application data
+directory. Existing `controllers-store` browser data is migrated the first time
+the app loads controllers; if no prior data exists, the app creates the initial
+Codex 43 record.
